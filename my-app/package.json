@@ -9,14 +9,37 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@apollo/client": "^3.8.3",
+    "@chakra-ui/next-js": "^2.1.5",
+    "@chakra-ui/react": "^2.8.1",
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@graphql-tools/graphql-file-loader": "^8.0.0",
+    "@graphql-tools/load": "^8.0.0",
+    "@graphql-tools/schema": "^10.0.0",
+    "@prisma/client": "^5.2.0",
     "@types/node": "20.6.0",
     "@types/react": "18.2.21",
     "@types/react-dom": "18.2.7",
     "eslint": "8.49.0",
     "eslint-config-next": "13.4.19",
+    "framer-motion": "^10.16.4",
+    "graphql": "^16.8.0",
+    "graphql-yoga": "^4.0.4",
     "next": "13.4.19",
+    "prisma": "^5.2.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-icons": "^4.11.0",
     "typescript": "5.2.2"
+  },
+  "devDependencies": {
+    "@graphql-codegen/cli": "^5.0.0",
+    "@graphql-codegen/schema-ast": "^4.0.0",
+    "@graphql-codegen/typescript": "^4.0.1",
+    "@graphql-codegen/typescript-operations": "^4.0.1",
+    "@graphql-codegen/typescript-react-apollo": "^3.3.7",
+    "@graphql-codegen/typescript-resolvers": "^4.0.1",
+    "ts-node": "^10.9.1"
   }
 }

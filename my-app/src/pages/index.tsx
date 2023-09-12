@@ -1,11 +1,70 @@
-import Head from 'next/head'
-import Image from 'next/image'
-import { Inter } from 'next/font/google'
-import styles from '@/styles/Home.module.css'
+import Head from "next/head";
+import type { ListTodosQuery } from "@/generated/request";
+import {
+  useListTodosQuery,
+  useAddTodoMutation,
+  useUpdateTodoMutation,
+  useDeleteTodoMutation,
+} from "@/generated/request";
+import { useEffect, useState, FormEvent } from "react";
+import { IoTrashBinSharp } from "react-icons/io5";
 
-const inter = Inter({ subsets: ['latin'] })
+import {
+  FormControl,
+  FormLabel,
+  FormErrorMessage,
+  FormHelperText,
+  Input,
+  Button,
+  Box,
+  Flex,
+  Checkbox,
+} from "@chakra-ui/react";
 
 export default function Home() {
+  const [todoContent, setTodoContent] = useState("");
+  const [todos, setTodos] = useState<ListTodosQuery["listTodos"]>([]);
+  const { loading, error, data, refetch } = useListTodosQuery();
+  const [addTodoMutation] = useAddTodoMutation();
+  const [updateTodoMutation] = useUpdateTodoMutation();
+  const [deleteTodoMutation] = useDeleteTodoMutation();
+
+  useEffect(() => {
+    setTodos(data?.listTodos ?? []);
+  }, [data?.listTodos]);
+
+  if (loading) return <div>loading...</div>;
+  if (error) return <div>error...</div>;
+  if (!data?.listTodos) return <div>data error...</div>;
+
+  const submitHandler = async (e: FormEvent) => {
+    e.preventDefault();
+    await addTodoMutation({
+      variables: {
+        content: todoContent,
+      },
+    });
+    setTodoContent("");
+    refetch();
+  };
+
+  const updateHandler = async (id: string, current: boolean) => {
+    await updateTodoMutation({
+      variables: {
+        id,
+        done: !current,
+      },
+    });
+    refetch();
+  };
+
+  const deleteHandler = async (id: string) => {
+    await deleteTodoMutation({
+      variables: { id },
+    });
+    refetch();
+  };
+
   return (
     <>
       <Head>
@@ -14,101 +73,48 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className={`${styles.main} ${inter.className}`}>
-        <div className={styles.description}>
-          <p>
-            Get started by editing&nbsp;
-            <code className={styles.code}>src/pages/index.tsx</code>
-          </p>
-          <div>
-            <a
-              href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              By{' '}
-              <Image
-                src="/vercel.svg"
-                alt="Vercel Logo"
-                className={styles.vercelLogo}
-                width={100}
-                height={24}
-                priority
+
+      <main>
+        <form onSubmit={submitHandler}>
+          <FormControl>
+            <Flex mt={10} mx={"auto"} maxW={"3xl"} gap={4}>
+              <Input
+                type="text"
+                placeholder="TODOを入力"
+                value={todoContent}
+                onChange={(e) => {
+                  setTodoContent(e.target.value);
+                }}
               />
-            </a>
-          </div>
-        </div>
-
-        <div className={styles.center}>
-          <Image
-            className={styles.logo}
-            src="/next.svg"
-            alt="Next.js Logo"
-            width={180}
-            height={37}
-            priority
-          />
-        </div>
-
-        <div className={styles.grid}>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2>
-              Docs <span>-&gt;</span>
-            </h2>
-            <p>
-              Find in-depth information about Next.js features and&nbsp;API.
-            </p>
-          </a>
-
-          <a
-            href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2>
-              Learn <span>-&gt;</span>
-            </h2>
-            <p>
-              Learn about Next.js in an interactive course with&nbsp;quizzes!
-            </p>
-          </a>
-
-          <a
-            href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2>
-              Templates <span>-&gt;</span>
-            </h2>
-            <p>
-              Discover and deploy boilerplate example Next.js&nbsp;projects.
-            </p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2>
-              Deploy <span>-&gt;</span>
-            </h2>
-            <p>
-              Instantly deploy your Next.js site to a shareable URL
-              with&nbsp;Vercel.
-            </p>
-          </a>
-        </div>
+              <Button colorScheme="teal" type="submit">
+                Submit
+              </Button>
+            </Flex>
+          </FormControl>
+        </form>
+        <Box mt={10} mx={"auto"} maxW={"3xl"}>
+          {todos.map((todo) => (
+            <Flex alignItems={"center"} my={7} gap={2} key={todo.id}>
+              <Checkbox
+                size={"lg"}
+                onClick={() => {
+                  updateHandler(todo.id, todo.done);
+                }}
+              >
+                {todo.content}
+              </Checkbox>
+              <Button
+                p={0}
+                onClick={() => {
+                  deleteHandler(todo.id);
+                }}
+              >
+                <IoTrashBinSharp size={18} />
+              </Button>
+            </Flex>
+          ))}
+        </Box>
       </main>
     </>
-  )
+  );
 }
